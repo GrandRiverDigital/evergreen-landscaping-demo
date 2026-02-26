@@ -1314,3 +1314,37 @@ footer {
   .testimonial-card { min-width: 90%; }
   #topbar { justify-content: center; }
 }
+
+/* ─────────────────────────────────────────────
+   IMAGE RESILIENCE — fallback backgrounds
+   Show a branded green gradient if any image fails
+───────────────────────────────────────────── */
+.hero-bg {
+  background: linear-gradient(160deg, #0a1408 0%, #1B3A0F 50%, #2d5a1b 100%);
+}
+.service-card {
+  background: linear-gradient(160deg, #111f0c 0%, #1B3A0F 100%) !important;
+}
+.gallery-item {
+  background: linear-gradient(160deg, #111f0c 0%, #1a3010 100%);
+}
+.why-img {
+  background: linear-gradient(160deg, #1B3A0F 0%, #2d5a1b 100%);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.about-img-main {
+  background: linear-gradient(160deg, #1B3A0F 0%, #2d5a1b 100%);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.about-img-accent {
+  background: linear-gradient(160deg, #2d5a1b 0%, #1B3A0F 100%);
+}
+
+/* Ensure image containers never collapse to zero height */
+.service-card { min-height: 240px; }
+.gallery-item { min-height: 180px; }
+.why-img img  { min-height: 200px; }
+.about-img-main img { min-height: 200px; }
+.about-img-accent img { min-height: 120px; }

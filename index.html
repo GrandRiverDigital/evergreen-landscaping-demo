@@ -12,6 +12,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <link rel="stylesheet" href="styles.css" />
+  <!-- Image resilience: define before any <img onerror="imgFallback(this)"> so onerror fires even on fast loads -->
+  <script>
+    var IMG_FALLBACK = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3ClinearGradient id=%22g%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22%3E%3Cstop offset=%220%25%22 stop-color=%22%231B3A0F%22/%3E%3Cstop offset=%22100%25%22 stop-color=%22%232d5a1b%22/%3E%3C/linearGradient%3E%3Crect width=%22800%22 height=%22600%22 fill=%22url(%23g)%22/%3E%3Cpath d=%22M380 260 C380 200 420 165 420 165 C420 165 460 200 460 260 C460 305 435 325 420 345 C405 325 380 305 380 260Z%22 fill=%22rgba(255,255,255,0.12)%22/%3E%3C/svg%3E';
+    function imgFallback(img) {
+      img.onerror = null;
+      img.src = IMG_FALLBACK;
+      img.style.objectFit = 'cover';
+      var p = img.parentElement;
+      if (p) p.style.background = 'linear-gradient(135deg,#1B3A0F 0%,#2d5a1b 100%)';
+    }
+  </script>
 </head>
 <body>
 
@@ -100,8 +111,7 @@
       src="https://images.pexels.com/photos/2079246/pexels-photo-2079246.jpeg?auto=compress&cs=tinysrgb&w=1800&h=900&dpr=1"
       alt="Beautifully landscaped garden with lush greenery and stone pathway"
       fetchpriority="high"
-      loading="eager"
-    />
+      loading="eager" onerror="imgFallback(this)">
   </div>
   <div class="hero-content">
     <div class="wrap">
@@ -196,7 +206,7 @@
     <div class="services-grid">
 
       <div class="service-card sr d1">
-        <img src="https://images.pexels.com/photos/1123972/pexels-photo-1123972.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Landscape design" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1123972/pexels-photo-1123972.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Landscape design" loading="lazy" onerror="imgFallback(this)">
         <div class="service-body">
           <div class="service-tag">Our Specialty</div>
           <h3>Landscape Design</h3>
@@ -209,7 +219,7 @@
       </div>
 
       <div class="service-card sr d2">
-        <img src="https://images.pexels.com/photos/1105019/pexels-photo-1105019.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Lawn care and maintenance" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1105019/pexels-photo-1105019.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Lawn care and maintenance" loading="lazy" onerror="imgFallback(this)">
         <div class="service-body">
           <div class="service-tag">Most Popular</div>
           <h3>Lawn Care &amp; Maintenance</h3>
@@ -219,7 +229,7 @@
       </div>
 
       <div class="service-card sr d3">
-        <img src="https://images.pexels.com/photos/1109354/pexels-photo-1109354.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Hardscaping patio design" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1109354/pexels-photo-1109354.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Hardscaping patio design" loading="lazy" onerror="imgFallback(this)">
         <div class="service-body">
           <div class="service-tag">Premium Service</div>
           <h3>Hardscaping</h3>
@@ -229,7 +239,7 @@
       </div>
 
       <div class="service-card sr d2">
-        <img src="https://images.pexels.com/photos/296230/pexels-photo-296230.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Irrigation and drainage systems" loading="lazy" />
+        <img src="https://images.pexels.com/photos/296230/pexels-photo-296230.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Irrigation and drainage systems" loading="lazy" onerror="imgFallback(this)">
         <div class="service-body">
           <div class="service-tag">Smart Systems</div>
           <h3>Irrigation &amp; Drainage</h3>
@@ -239,7 +249,7 @@
       </div>
 
       <div class="service-card sr d3">
-        <img src="https://images.pexels.com/photos/1566837/pexels-photo-1566837.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Outdoor landscape lighting" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1566837/pexels-photo-1566837.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Outdoor landscape lighting" loading="lazy" onerror="imgFallback(this)">
         <div class="service-body">
           <div class="service-tag">Transform Your Space</div>
           <h3>Outdoor Lighting</h3>
@@ -249,7 +259,7 @@
       </div>
 
       <div class="service-card sr d4">
-        <img src="https://images.pexels.com/photos/1036936/pexels-photo-1036936.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Seasonal cleanup" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1036936/pexels-photo-1036936.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="Seasonal cleanup" loading="lazy" onerror="imgFallback(this)">
         <div class="service-body">
           <div class="service-tag">Spring &amp; Fall</div>
           <h3>Seasonal Cleanup</h3>
@@ -275,7 +285,7 @@
 
     <div class="gallery-grid" id="gallery" role="list">
       <div class="gallery-item featured sr" data-src="https://images.pexels.com/photos/1453499/pexels-photo-1453499.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&dpr=1" data-caption="Full Backyard Transformation — Patio + Plantings" role="listitem">
-        <img src="https://images.pexels.com/photos/1453499/pexels-photo-1453499.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" alt="Backyard patio transformation" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1453499/pexels-photo-1453499.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" alt="Backyard patio transformation" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Backyard Transformation</span></div>
         <div class="gallery-zoom" aria-hidden="true">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -283,43 +293,43 @@
       </div>
 
       <div class="gallery-item sr d1" data-src="https://images.pexels.com/photos/7018413/pexels-photo-7018413.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Outdoor Living Space — Stone Patio + Fire Pit" role="listitem">
-        <img src="https://images.pexels.com/photos/7018413/pexels-photo-7018413.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Outdoor living space with stone patio" loading="lazy" />
+        <img src="https://images.pexels.com/photos/7018413/pexels-photo-7018413.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Outdoor living space with stone patio" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Outdoor Living Space</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
 
       <div class="gallery-item sr d2" data-src="https://images.pexels.com/photos/1707820/pexels-photo-1707820.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Garden Path & Planting Beds" role="listitem">
-        <img src="https://images.pexels.com/photos/1707820/pexels-photo-1707820.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Garden pathway with stone and plants" loading="lazy" />
+        <img src="https://images.pexels.com/photos/1707820/pexels-photo-1707820.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Garden pathway with stone and plants" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Garden Path Design</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
 
       <div class="gallery-item wide sr d1" data-src="https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&dpr=1" data-caption="Front Yard Makeover — Curb Appeal Project" role="listitem">
-        <img src="https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" alt="Front yard curb appeal landscaping" loading="lazy" />
+        <img src="https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" alt="Front yard curb appeal landscaping" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Curb Appeal Makeover</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
 
       <div class="gallery-item sr d2" data-src="https://images.pexels.com/photos/4503261/pexels-photo-4503261.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Interlock Patio — Natural Stone" role="listitem">
-        <img src="https://images.pexels.com/photos/4503261/pexels-photo-4503261.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Interlocking stone patio installation" loading="lazy" />
+        <img src="https://images.pexels.com/photos/4503261/pexels-photo-4503261.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Interlocking stone patio installation" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Stone Patio</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
 
       <div class="gallery-item sr d3" data-src="https://images.pexels.com/photos/5824524/pexels-photo-5824524.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Evening Garden Lighting Installation" role="listitem">
-        <img src="https://images.pexels.com/photos/5824524/pexels-photo-5824524.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Evening outdoor landscape lighting" loading="lazy" />
+        <img src="https://images.pexels.com/photos/5824524/pexels-photo-5824524.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Evening outdoor landscape lighting" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Landscape Lighting</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
 
       <div class="gallery-item sr d2" data-src="https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Perennial Garden Design" role="listitem">
-        <img src="https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Perennial garden design with flowers" loading="lazy" />
+        <img src="https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Perennial garden design with flowers" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Perennial Garden</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
 
       <div class="gallery-item sr d3" data-src="https://images.pexels.com/photos/4503268/pexels-photo-4503268.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Retaining Wall + Tiered Garden Beds" role="listitem">
-        <img src="https://images.pexels.com/photos/4503268/pexels-photo-4503268.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Retaining wall and tiered garden beds" loading="lazy" />
+        <img src="https://images.pexels.com/photos/4503268/pexels-photo-4503268.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Retaining wall and tiered garden beds" loading="lazy" onerror="imgFallback(this)">
         <div class="gallery-overlay"><span class="gallery-label">Retaining Wall</span></div>
         <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       </div>
@@ -344,8 +354,7 @@
         <img
           src="https://images.pexels.com/photos/1036936/pexels-photo-1036936.jpeg?auto=compress&cs=tinysrgb&w=700&h=900&dpr=1"
           alt="Professional landscaping crew at work"
-          loading="lazy"
-        />
+          loading="lazy" onerror="imgFallback(this)">
         <div class="why-img-badge">
           <div class="big">15+</div>
           <div class="sm">Years of<br>Experience</div>
@@ -510,15 +519,13 @@
           <img
             src="https://images.pexels.com/photos/4488180/pexels-photo-4488180.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1"
             alt="Evergreen Outdoor Living landscaping crew at work"
-            loading="lazy"
-          />
+            loading="lazy" onerror="imgFallback(this)">
         </div>
         <div class="about-img-accent">
           <img
             src="https://images.pexels.com/photos/129733/pexels-photo-129733.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&dpr=1"
             alt="Beautiful garden detail"
-            loading="lazy"
-          />
+            loading="lazy" onerror="imgFallback(this)">
         </div>
       </div>
       <div>
@@ -744,7 +751,7 @@
   <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous image">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <img id="lb-img" src="" alt="" />
+  <img id="lb-img" src="" alt="" onerror="imgFallback(this)">
   <button class="lb-nav lb-next" id="lb-next" aria-label="Next image">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
