@@ -277,11 +277,17 @@ if (track && cards.length) {
 }
 
 /* ─────────────────────────────────────────────
-   8. MOBILE STICKY BAR
+   8. MOBILE STICKY BAR — scroll-triggered + 600ms fallback
 ───────────────────────────────────────────── */
 const mobBar = $('#mob-bar');
 if (mobBar) {
-  setTimeout(() => mobBar.classList.add('visible'), 1800);
+  let mobBarShown = false;
+  const showMobBar = () => {
+    if (!mobBarShown) { mobBarShown = true; mobBar.classList.add('visible'); }
+  };
+  // Show on first scroll, fallback after 600ms
+  window.addEventListener('scroll', showMobBar, { passive: true, once: true });
+  setTimeout(showMobBar, 600);
 }
 
 /* ─────────────────────────────────────────────
@@ -290,9 +296,13 @@ if (mobBar) {
 const quoteForm = $('#quote-form');
 const submitBtn = $('#form-submit-btn');
 if (quoteForm && submitBtn) {
+  // Snapshot childNodes before any mutation so we can restore if needed
+  const btnOriginalNodes = [...submitBtn.childNodes].map(n => n.cloneNode(true));
   quoteForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    submitBtn.innerHTML = '✅ Sent! We\'ll be in touch within 24 hours.';
+    // Build success state via DOM (never innerHTML)
+    const checkmark = document.createTextNode('\u2705 Sent! We\u2019ll be in touch within 24 hours.');
+    submitBtn.replaceChildren(checkmark);
     submitBtn.style.background = '#10B981';
     submitBtn.style.boxShadow = '0 8px 24px rgba(16,185,129,.38)';
     submitBtn.style.pointerEvents = 'none';
