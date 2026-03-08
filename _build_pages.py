@@ -1,0 +1,680 @@
+#!/usr/bin/env python3
+"""Build all 5 Evergreen multi-page HTML files."""
+
+import os
+
+BASE = '/home/fox/workspace/evergreen'
+
+# ── Shared SVGs ────────────────────────────────────────────────
+PHONE_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.94a16 16 0 0 0 6.16 6.16l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+LEAF_SVG  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>'
+ARROW_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'
+
+IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3ClinearGradient id=%22g%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22%3E%3Cstop offset=%220%25%22 stop-color=%22%231B3A0F%22/%3E%3Cstop offset=%22100%25%22 stop-color=%22%232d5a1b%22/%3E%3C/linearGradient%3E%3Crect width=%22800%22 height=%22600%22 fill=%22url(%23g)%22/%3E%3Cpath d=%22M380 260 C380 200 420 165 420 165 C420 165 460 200 460 260 C460 305 435 325 420 345 C405 325 380 305 380 260Z%22 fill=%22rgba(255,255,255,0.12)%22/%3E%3C/svg%3E"
+
+# ── Shared components ───────────────────────────────────────────
+def head(title, desc, prefix=""):
+    return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B3A0F" />
+  <title>{title} | Evergreen Outdoor Living</title>
+  <meta name="description" content="{desc}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="{prefix}styles.css" />
+  <script>
+    var IMG_FALLBACK = '{IMG_FALLBACK}';
+    function imgFallback(img) {{
+      img.onerror = null; img.src = IMG_FALLBACK; img.style.objectFit = 'cover';
+      var p = img.parentElement;
+      if (p) p.style.background = 'linear-gradient(135deg,#1B3A0F 0%,#2d5a1b 100%)';
+    }}
+  </script>
+</head>
+<body>'''
+
+def topbar():
+    return '''
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="topbar-left">
+    <div class="topbar-item">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Tri-City &amp; Surrounding Areas
+    </div>
+    <div class="topbar-item">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mon–Fri 7am–7pm &nbsp;|&nbsp; Sat 8am–5pm
+    </div>
+  </div>
+  <a href="tel:5552349876" class="topbar-phone">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.94a16 16 0 0 0 6.16 6.16l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    (555) 234-9876
+  </a>
+</div>'''
+
+def header(prefix, active=""):
+    links = [
+        ("services/", "Services"),
+        ("projects/", "Projects"),
+        ("about/",    "About"),
+        ("contact/",  "Contact"),
+    ]
+    nav_items = ""
+    mob_items = ""
+    for slug, label in links:
+        href = prefix + slug
+        cls = ' class="active"' if active == slug.rstrip('/') else ''
+        nav_items += f'\n      <a href="{href}"{cls}>{label}</a>'
+        mob_items += f'\n    <a href="{href}" class="mobile-link"{cls}>{label}</a>'
+
+    home_href = prefix if prefix else "./"
+    contact_href = prefix + "contact/"
+    return f'''
+<!-- HEADER -->
+<header id="hdr">
+  <div class="wrap hdr-inner">
+    <a href="{home_href}" class="logo" aria-label="Evergreen Outdoor Living — home">
+      <div class="logo-leaf" aria-hidden="true">{LEAF_SVG}</div>
+      <div class="logo-text">Evergreen<span>Outdoor Living</span></div>
+    </a>
+    <nav class="desktop-nav" aria-label="Main navigation">{nav_items}
+    </nav>
+    <div class="hdr-right">
+      <a href="tel:5552349876" class="hdr-phone" aria-label="Call us">{PHONE_SVG}(555) 234-9876</a>
+      <a href="{contact_href}" class="btn btn-primary btn-sm">Free Estimate</a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+  <nav>{mob_items}
+  </nav>
+  <div class="mobile-nav-cta">
+    <a href="tel:5552349876" class="btn btn-outline-dk btn-lg" style="justify-content:center">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.94a16 16 0 0 0 6.16 6.16l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      (555) 234-9876
+    </a>
+    <a href="{contact_href}" class="btn btn-primary btn-lg" style="justify-content:center">Get Free Estimate</a>
+  </div>
+</div>'''
+
+def page_hero(title, sub, eyebrow=""):
+    eye = f'<div class="eyebrow sr">{eyebrow}</div>' if eyebrow else ''
+    return f'''
+<!-- PAGE HERO -->
+<section class="page-hero" aria-label="{title}">
+  <div class="wrap">
+    {eye}
+    <h1 class="page-hero__title sr">{title}</h1>
+    <p class="page-hero__sub sr d1">{sub}</p>
+  </div>
+</section>'''
+
+def cta_band(prefix):
+    contact_href = prefix + "contact/"
+    return f'''
+<!-- CTA BAND -->
+<section class="cta-band" aria-labelledby="cta-heading">
+  <div class="wrap cta-band__inner">
+    <div class="cta-band__copy">
+      <h2 id="cta-heading">Ready to Transform Your Outdoor Space?</h2>
+      <p>Free written estimate within 48 hours. No pressure, no obligation.</p>
+    </div>
+    <a href="{contact_href}" class="btn btn-primary btn-lg">Get a Free Estimate {ARROW_SVG}</a>
+  </div>
+</section>'''
+
+def footer_html(prefix):
+    home = prefix if prefix else "./"
+    return f'''
+<!-- FOOTER -->
+<footer aria-label="Site footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="{home}" class="logo" aria-label="Evergreen Outdoor Living home">
+          <div class="logo-leaf" aria-hidden="true">{LEAF_SVG}</div>
+          <div class="logo-text">Evergreen<span>Outdoor Living</span></div>
+        </a>
+        <p>Tri-City's trusted landscaping partner since 2009. Design, installation, maintenance — all under one roof.</p>
+        <div class="footer-hours">
+          <div class="footer-hour"><strong>Mon–Fri</strong><span>7:00am – 7:00pm</span></div>
+          <div class="footer-hour"><strong>Saturday</strong><span>8:00am – 5:00pm</span></div>
+          <div class="footer-hour"><strong>Sunday</strong><span>Closed</span></div>
+        </div>
+        <div class="footer-socials" aria-label="Social media">
+          <a href="#" class="footer-soc" aria-label="Instagram"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="#" class="footer-soc" aria-label="Facebook"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="#" class="footer-soc" aria-label="Google Reviews"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Services</h5>
+        <ul>
+          <li><a href="{prefix}services/">Landscape Design</a></li>
+          <li><a href="{prefix}services/">Lawn Care</a></li>
+          <li><a href="{prefix}services/">Hardscaping</a></li>
+          <li><a href="{prefix}services/">Irrigation</a></li>
+          <li><a href="{prefix}services/">Outdoor Lighting</a></li>
+          <li><a href="{prefix}services/">Seasonal Cleanup</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="{prefix}about/">About Us</a></li>
+          <li><a href="{prefix}projects/">Our Work</a></li>
+          <li><a href="{prefix}contact/">Get a Quote</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="tel:5552349876">(555) 234-9876</a></li>
+          <li><a href="mailto:hello@evergreenoutdoor.ca">hello@evergreenoutdoor.ca</a></li>
+          <li><a href="{prefix}contact/">Kitchener · Cambridge · Waterloo</a></li>
+          <li><a href="{prefix}contact/">Guelph &amp; Surrounding Areas</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 Evergreen Outdoor Living. All rights reserved. Fully Licensed &amp; Insured.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Sitemap</a>
+      </div>
+    </div>
+    <div class="grd-banner">This is a demo site built by <a href="https://grandriverdigital.ca" target="_blank" rel="noopener">Grand River Digital</a></div>
+  </div>
+</footer>'''
+
+def mob_bar(prefix):
+    return f'''
+<!-- MOBILE BAR -->
+<div id="mob-bar" role="navigation" aria-label="Quick contact">
+  <a href="tel:5552349876" class="btn btn-primary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.94a16 16 0 0 0 6.16 6.16l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    Call Now
+  </a>
+  <a href="{prefix}contact/" class="btn btn-outline-dk">Free Estimate</a>
+</div>'''
+
+def lightbox():
+    return '''
+<!-- LIGHTBOX -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lb-close" id="lb-close" aria-label="Close image viewer">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous image">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <img id="lb-img" src="" alt="" onerror="imgFallback(this)">
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next image">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div class="lb-caption" id="lb-caption"></div>
+</div>'''
+
+def script(prefix):
+    return f'<script src="{prefix}script.js"></script>'
+
+# ══════════════════════════════════════════════════════════════════
+# SERVICES SECTION (shared between home and services page)
+# ══════════════════════════════════════════════════════════════════
+def services_grid(prefix, show_cta=True):
+    cta_href = prefix + "contact/"
+    services_href = prefix + "services/"
+    cards = [
+        ("4503263","Landscape design — hands preparing garden soil for planting","Our Specialty","Landscape Design","Custom-designed outdoor spaces tailored to your home, lifestyle, and budget. 3D design previews available before any ground is broken."),
+        ("1453499","Lawn care — professional maintaining a residential backyard lawn","Most Popular","Lawn Care &amp; Maintenance","Weekly, biweekly, or seasonal programs. Mowing, edging, fertilizing, aeration, and overseeding for a lush, healthy lawn year-round."),
+        ("296230","Hardscaping installation — ground preparation for patio and stonework","Premium Service","Hardscaping","Patios, walkways, retaining walls, and driveways using natural stone, interlocking brick, and concrete. Built to last decades."),
+        ("4503268","Irrigation — watering garden plants and maintaining healthy growth","Smart Systems","Irrigation &amp; Drainage","Automatic irrigation systems, drip lines, catch basins, and French drains. Protect your investment and reduce water bills."),
+        ("1379636","Outdoor garden with autumn foliage — seasonal outdoor living space","Transform Your Space","Outdoor Lighting","Architectural uplighting, pathway lights, deck and pergola lighting. Adds ambiance, security, and curb appeal after dark."),
+        ("4503275","Seasonal cleanup — precision pruning and plant trimming","Spring &amp; Fall","Seasonal Cleanup","Spring cleanups, fall leaf removal, pruning, mulching, and winter prep. We keep your property looking its best in every season."),
+    ]
+    grid = '<div class="services-grid">\n'
+    for i,(pid,alt,tag,title,desc) in enumerate(cards):
+        d = f' d{i+1}' if i < 5 else ' d4'
+        grid += f'''
+      <div class="service-card sr{d}">
+        <img src="https://images.pexels.com/photos/{pid}/pexels-photo-{pid}.jpeg?auto=compress&cs=tinysrgb&w=800&h=534&dpr=1" alt="{alt}" loading="lazy" onerror="imgFallback(this)">
+        <div class="service-body">
+          <div class="service-tag">{tag}</div>
+          <h3>{title}</h3>
+          <p class="service-desc">{desc}</p>
+          <a href="{services_href}" class="service-arrow">Learn more {ARROW_SVG}</a>
+        </div>
+      </div>'''
+    grid += '\n    </div>'
+    cta = f'\n    <div class="gallery-cta sr" style="margin-top:2.5rem"><a href="{services_href}" class="btn btn-primary">View All Services {ARROW_SVG}</a></div>' if show_cta else ''
+    return grid + cta
+
+# ══════════════════════════════════════════════════════════════════
+# WHY CHOOSE US
+# ══════════════════════════════════════════════════════════════════
+def why_us():
+    return '''
+<!-- WHY CHOOSE US -->
+<section id="why-us" aria-labelledby="why-title">
+  <div class="wrap">
+    <div class="why-grid">
+      <div class="why-img sr">
+        <img src="https://images.pexels.com/photos/4503272/pexels-photo-4503272.jpeg?auto=compress&cs=tinysrgb&w=700&h=900&dpr=1"
+             alt="Professional landscaper with tools ready for outdoor work" loading="lazy" onerror="imgFallback(this)">
+        <div class="why-img-badge"><div class="big">15+</div><div class="sm">Years of<br>Experience</div></div>
+      </div>
+      <div>
+        <div class="eyebrow sr">Why Choose Us</div>
+        <h2 class="section-title sr d1" id="why-title">The Evergreen Difference</h2>
+        <p class="section-sub sr d2" style="margin-bottom:0">
+          We're not the biggest landscaping company in the Tri-City area. We're intentionally focused on quality over volume — and our clients notice the difference.
+        </p>
+        <div class="why-benefits">
+          <div class="why-benefit sr d1">
+            <div class="why-benefit-icon" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><h4>Fully Licensed &amp; Insured</h4><p>$5M liability coverage. WSIB compliant. Every crew member is background-checked and fully trained. Your property is protected.</p></div>
+          </div>
+          <div class="why-benefit sr d2">
+            <div class="why-benefit-icon" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div><h4>Upfront Written Quotes</h4><p>No surprise invoices. We give you a detailed written quote and stick to it. What we quote is what you pay — always.</p></div>
+          </div>
+          <div class="why-benefit sr d3">
+            <div class="why-benefit-icon" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div><h4>On-Time, Every Time</h4><p>We respect your schedule. If we're ever delayed, you hear from us before the job date — not the day you're waiting around.</p></div>
+          </div>
+          <div class="why-benefit sr d4">
+            <div class="why-benefit-icon" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+            <div><h4>Sustainable Practices</h4><p>Native plantings, water-efficient irrigation, and organic fertilizer programs. Beautiful landscapes that are good for the environment.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>'''
+
+# ══════════════════════════════════════════════════════════════════
+# GALLERY (used on projects page)
+# ══════════════════════════════════════════════════════════════════
+def gallery(prefix):
+    return f'''
+<!-- GALLERY -->
+<section id="projects" aria-labelledby="proj-title">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow sr">Our Portfolio</div>
+      <h2 class="section-title sr d1" id="proj-title">Recent Projects</h2>
+      <p class="section-sub cx sr d2">Every photo is a real job, a real family, a real transformation.</p>
+    </div>
+    <div class="gallery-grid" id="gallery" role="list">
+      <div class="gallery-item featured sr" data-src="https://images.pexels.com/photos/1453499/pexels-photo-1453499.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&dpr=1" data-caption="Full Lawn Care &amp; Backyard Maintenance — Guelph" role="listitem">
+        <img src="https://images.pexels.com/photos/1453499/pexels-photo-1453499.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" alt="Professional lawn care and maintenance in a residential backyard" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Lawn Care Project</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item sr d1" data-src="https://images.pexels.com/photos/4503272/pexels-photo-4503272.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Professional Landscaper — Design &amp; Installation" role="listitem">
+        <img src="https://images.pexels.com/photos/4503272/pexels-photo-4503272.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Professional landscaper with tools and apron" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Professional Team</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item sr d2" data-src="https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Perennial Garden — Flowering Baskets &amp; Beds" role="listitem">
+        <img src="https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Beautiful flowering garden baskets with pink blooms" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Perennial Garden</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item wide sr d1" data-src="https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&dpr=1" data-caption="Curb Appeal — Residential Landscaping &amp; Exterior" role="listitem">
+        <img src="https://images.pexels.com/photos/209315/pexels-photo-209315.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" alt="Residential home with manicured front yard landscaping" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Curb Appeal Project</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item sr d2" data-src="https://images.pexels.com/photos/4503261/pexels-photo-4503261.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Interlock Patio — Natural Stone" role="listitem">
+        <img src="https://images.pexels.com/photos/4503261/pexels-photo-4503261.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Interlocking stone patio installation" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Stone Patio</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item sr d3" data-src="https://images.pexels.com/photos/1379636/pexels-photo-1379636.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Fall Garden Cleanup &amp; Seasonal Maintenance" role="listitem">
+        <img src="https://images.pexels.com/photos/1379636/pexels-photo-1379636.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Colourful autumn garden with seasonal foliage" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Fall Cleanup</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item sr d2" data-src="https://images.pexels.com/photos/4503263/pexels-photo-4503263.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Garden Installation — Planting &amp; Soil Preparation" role="listitem">
+        <img src="https://images.pexels.com/photos/4503263/pexels-photo-4503263.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Hands carefully planting in fresh garden soil" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Garden Installation</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+      <div class="gallery-item sr d3" data-src="https://images.pexels.com/photos/1105017/pexels-photo-1105017.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&dpr=1" data-caption="Spring Planting — New Seedlings &amp; Garden Prep" role="listitem">
+        <img src="https://images.pexels.com/photos/1105017/pexels-photo-1105017.jpeg?auto=compress&cs=tinysrgb&w=700&h=467&dpr=1" alt="Young seedlings in pots ready for spring garden planting" loading="lazy" onerror="imgFallback(this)">
+        <div class="gallery-overlay"><span class="gallery-label">Spring Plantings</span></div>
+        <div class="gallery-zoom" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      </div>
+    </div>
+    <div class="gallery-cta sr">
+      <a href="{prefix}contact/" class="btn btn-primary">Start Your Project {ARROW_SVG}</a>
+    </div>
+  </div>
+</section>'''
+
+# ══════════════════════════════════════════════════════════════════
+# TESTIMONIALS CAROUSEL
+# ══════════════════════════════════════════════════════════════════
+TESTIMONIALS = '''
+<!-- TESTIMONIALS CAROUSEL -->
+<section id="testimonials" aria-labelledby="test-title">
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1.5rem;margin-bottom:2.5rem;">
+      <div class="testimonials-intro">
+        <div class="eyebrow lt sr">Client Reviews</div>
+        <h2 class="section-title lt sr d1" id="test-title">What Our Clients Say</h2>
+        <div class="rating-display sr d2">
+          <div class="stars" aria-label="5 star rating">★★★★★</div>
+          <div class="rating-text">4.9 · 200+ verified reviews · Google</div>
+        </div>
+      </div>
+      <div class="carousel-controls sr d1">
+        <button class="carousel-btn" id="prev-btn" aria-label="Previous testimonials">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="carousel-dots" id="carousel-dots" role="tablist"></div>
+        <button class="carousel-btn" id="next-btn" aria-label="Next testimonials">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="carousel-wrap">
+      <div class="carousel-track-outer">
+        <div class="carousel-track" id="carousel-track">
+          <div class="testimonial-card">
+            <div class="t-quote">"</div><div class="t-stars">★★★★★</div>
+            <p class="t-text">We hired Evergreen to completely redo our backyard. The team was professional from start to finish — showed up when they said, kept the site clean, and the final result was beyond what we imagined. Our neighbours keep asking who did it.</p>
+            <div class="t-author"><div class="t-avatar" aria-hidden="true">S</div><div><div class="t-name">Sarah &amp; Michael T.</div><div class="t-loc">Kitchener · Google · 3 weeks ago</div></div></div>
+          </div>
+          <div class="testimonial-card">
+            <div class="t-quote">"</div><div class="t-stars">★★★★★</div>
+            <p class="t-text">Best investment we've made in our home. The stone patio and retaining wall added serious value. Quote was accurate to the dollar — no add-ons, no surprises. Will 100% use them again for our front yard next spring.</p>
+            <div class="t-author"><div class="t-avatar" aria-hidden="true">J</div><div><div class="t-name">Jason R.</div><div class="t-loc">Cambridge · Google · 1 month ago</div></div></div>
+          </div>
+          <div class="testimonial-card">
+            <div class="t-quote">"</div><div class="t-stars">★★★★★</div>
+            <p class="t-text">Five years on the lawn care program and our grass has never looked better. The crew is always on time, the property always looks great, and they actually notice small issues before they become big ones. Couldn't ask for more.</p>
+            <div class="t-author"><div class="t-avatar" aria-hidden="true">L</div><div><div class="t-name">Linda &amp; Dave K.</div><div class="t-loc">Waterloo · Google · 6 weeks ago</div></div></div>
+          </div>
+          <div class="testimonial-card">
+            <div class="t-quote">"</div><div class="t-stars">★★★★★</div>
+            <p class="t-text">The outdoor lighting they installed completely transformed our backyard at night. We use the space twice as much now. The designer really listened to what we wanted and the installation was clean and professional.</p>
+            <div class="t-author"><div class="t-avatar" aria-hidden="true">A</div><div><div class="t-name">Amanda F.</div><div class="t-loc">Guelph · Google · 2 months ago</div></div></div>
+          </div>
+          <div class="testimonial-card">
+            <div class="t-quote">"</div><div class="t-stars">★★★★★</div>
+            <p class="t-text">Had three quotes. Evergreen wasn't the cheapest but they were the most thorough — came out twice before giving a price, explained everything, and the work reflects that. You get what you pay for and these guys deliver.</p>
+            <div class="t-author"><div class="t-avatar" aria-hidden="true">M</div><div><div class="t-name">Mark W.</div><div class="t-loc">Elmira · Google · 2 months ago</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>'''
+
+# ══════════════════════════════════════════════════════════════════
+# STATS STRIP
+# ══════════════════════════════════════════════════════════════════
+STATS = '''
+<div id="stats" aria-label="Business statistics">
+  <div class="wrap">
+    <div class="stats-row">
+      <div class="stat-cell"><div class="stat-n" id="sn-proj">0<span class="accent">+</span></div><div class="stat-l">Projects Completed</div></div>
+      <div class="stat-cell"><div class="stat-n" id="sn-yrs">0<span class="accent">yr</span></div><div class="stat-l">Years in Business</div></div>
+      <div class="stat-cell"><div class="stat-n">4.9<span class="accent">★</span></div><div class="stat-l">Google Rating</div></div>
+      <div class="stat-cell"><div class="stat-n">100<span class="accent">%</span></div><div class="stat-l">Satisfaction Rate</div></div>
+    </div>
+  </div>
+</div>'''
+
+# ══════════════════════════════════════════════════════════════════
+# CONTACT FORM
+# ══════════════════════════════════════════════════════════════════
+def contact_form(prefix):
+    return f'''
+<!-- CONTACT / QUOTE -->
+<section id="quote" style="background:var(--warm);" aria-labelledby="quote-title">
+  <div class="wrap">
+    <div class="quote-grid">
+      <div>
+        <div class="eyebrow sr">Get Started</div>
+        <h2 class="quote-left h2 sr d1" id="quote-title" style="font-family:var(--fd);font-size:clamp(1.85rem,4.5vw,2.85rem);font-weight:700;line-height:1.18;letter-spacing:-.02em;color:var(--text);margin-bottom:1rem">
+          Free Estimate —<br>No Pressure, No Obligation
+        </h2>
+        <p class="sr d2" style="font-size:1rem;color:var(--text-lt);line-height:1.75;margin-bottom:2rem;max-width:400px">
+          Tell us about your project. We'll visit your property, listen to your ideas, and give you a detailed written quote within 48 hours.
+        </p>
+        <div class="contact-items sr d3">
+          <a href="tel:5552349876" class="contact-item" style="text-decoration:none">
+            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.94a16 16 0 0 0 6.16 6.16l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div><strong>(555) 234-9876</strong><span>Mon–Fri 7am–7pm · Sat 8am–5pm</span></div>
+          </a>
+          <a href="mailto:hello@evergreenoutdoor.ca" class="contact-item" style="text-decoration:none">
+            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div><strong>hello@evergreenoutdoor.ca</strong><span>Response within 24 hours</span></div>
+          </a>
+          <div class="contact-item">
+            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div><strong>Tri-City &amp; Surrounding Areas</strong><span>Kitchener · Cambridge · Waterloo · Guelph</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-form-card sr d2">
+        <div class="form-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Quote within 48 hours
+        </div>
+        <h3>Request a Free Estimate</h3>
+        <p>No obligation. Just an honest assessment of your project.</p>
+        <form id="quote-form" novalidate>
+          <div class="form-row">
+            <div class="form-group"><label for="fname">First Name *</label><input id="fname" type="text" placeholder="Jane" required autocomplete="given-name" /></div>
+            <div class="form-group"><label for="lname">Last Name *</label><input id="lname" type="text" placeholder="Smith" required autocomplete="family-name" /></div>
+          </div>
+          <div class="form-group"><label for="fphone">Phone Number *</label><input id="fphone" type="tel" placeholder="(555) 000-0000" required autocomplete="tel" /></div>
+          <div class="form-group"><label for="femail">Email Address</label><input id="femail" type="email" placeholder="jane@example.com" autocomplete="email" /></div>
+          <div class="form-group">
+            <label for="fservice">Service Interested In *</label>
+            <select id="fservice" required>
+              <option value="">Choose a service…</option>
+              <option>Landscape Design</option>
+              <option>Lawn Care &amp; Maintenance</option>
+              <option>Hardscaping (Patio / Walkway)</option>
+              <option>Irrigation &amp; Drainage</option>
+              <option>Outdoor Lighting</option>
+              <option>Seasonal Cleanup</option>
+              <option>Full Backyard Renovation</option>
+              <option>Not sure — need a consultation</option>
+            </select>
+          </div>
+          <div class="form-group"><label for="fmsg">Tell Us About Your Project</label><textarea id="fmsg" rows="3" placeholder="e.g. Backyard needs full renovation, approx 1,500 sq ft, including patio and plantings…"></textarea></div>
+          <button type="submit" id="form-submit-btn" class="btn btn-primary btn-lg form-submit">
+            Request Free Estimate
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <p class="form-disc">🔒 Your information stays private. We only use it to contact you about your project.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>'''
+
+# ══════════════════════════════════════════════════════════════════
+# BUILD EACH PAGE
+# ══════════════════════════════════════════════════════════════════
+
+def build_home():
+    p = ""
+    return (
+        head("Tri-City's Premier Landscaping", "Evergreen Outdoor Living — professional landscape design, lawn care, hardscaping, and outdoor lighting across the Tri-City & surrounding areas. Get a free estimate today.", p) +
+        topbar() + header(p, "") +
+        '''
+<!-- HERO -->
+<section id="hero" aria-labelledby="hero-h1">
+  <div class="hero-bg">
+    <img src="https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=1800&h=900&dpr=1"
+         alt="Lush green landscape with mature trees and natural outdoor beauty"
+         fetchpriority="high" loading="eager" onerror="imgFallback(this)">
+  </div>
+  <div class="hero-content">
+    <div class="wrap">
+      <div class="hero-inner">
+        <div class="hero-kicker"><span class="dot" aria-hidden="true"></span>Tri-City &amp; Surrounding Areas</div>
+        <h1 id="hero-h1"><em>Beautiful</em> Landscapes.<br>Built to Last.</h1>
+        <p class="hero-sub">From concept to completion — we design, install, and maintain outdoor spaces that add beauty, value, and function to your property. Family-owned and operated since 2009.</p>
+        <div class="hero-ctas">
+          <a href="contact/" class="btn btn-primary btn-lg">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Get a Free Estimate
+          </a>
+          <a href="projects/" class="btn btn-outline btn-lg">
+            View Our Work
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="hero-badges" role="list" aria-label="Trust indicators">
+          <div class="hero-badge" role="listitem"><span class="badge-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>5-Star Google Rated</div>
+          <div class="hero-badge" role="listitem"><span class="badge-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Fully Licensed &amp; Insured</div>
+          <div class="hero-badge" role="listitem"><span class="badge-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Free Written Quotes</div>
+          <div class="hero-badge" role="listitem"><span class="badge-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>15+ Years Experience</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>''' +
+        STATS +
+        '\n<!-- SERVICES -->\n<section id="services" aria-labelledby="svc-title">\n  <div class="wrap">\n    <div class="section-head"><div class="eyebrow sr">What We Do</div><h2 class="section-title sr d1" id="svc-title">Complete Outdoor Services,<br>One Trusted Team</h2><p class="section-sub sr d2">From first consultation to final walkthrough — we handle every aspect of your outdoor project with precision and care.</p></div>' +
+        services_grid(p) + '\n  </div>\n</section>' +
+        TESTIMONIALS +
+        cta_band(p) +
+        footer_html(p) +
+        mob_bar(p) +
+        '\n' + script(p) +
+        '\n</body>\n</html>'
+    )
+
+def build_services():
+    p = "../"
+    return (
+        head("Our Services", "Professional landscaping services across the Tri-City — landscape design, lawn care, hardscaping, irrigation, outdoor lighting, and seasonal cleanup.", p) +
+        topbar() + header(p, "services") +
+        page_hero("Our Services", "From first consultation to final walkthrough — we handle every aspect of your outdoor project with precision and care.", "What We Do") +
+        '\n<section aria-labelledby="svc-title">\n  <div class="wrap">\n    <div class="section-head"><h2 class="section-title sr d1" id="svc-title">Complete Outdoor Services,<br>One Trusted Team</h2></div>' +
+        services_grid(p, show_cta=False) + '\n  </div>\n</section>' +
+        why_us() +
+        cta_band(p) +
+        footer_html(p) +
+        mob_bar(p) +
+        '\n' + script(p) +
+        '\n</body>\n</html>'
+    )
+
+def build_projects():
+    p = "../"
+    return (
+        head("Our Projects", "Browse Evergreen Outdoor Living's project gallery — lawn care, hardscaping, gardens, patios, and more across the Tri-City area.", p) +
+        topbar() + header(p, "projects") +
+        page_hero("Our Work", "Every photo is a real job, a real family, a real transformation. Browse our recent portfolio across the Tri-City.", "Our Portfolio") +
+        gallery(p) +
+        cta_band(p) +
+        footer_html(p) +
+        mob_bar(p) +
+        lightbox() +
+        '\n' + script(p) +
+        '\n</body>\n</html>'
+    )
+
+def build_about():
+    p = "../"
+    return (
+        head("About Us", "Evergreen Outdoor Living — family-owned landscaping company serving the Tri-City since 2009. Learn about our story, values, and team.", p) +
+        topbar() + header(p, "about") +
+        page_hero("About Us", "Family-owned and operated since 2009. Learn about the people behind Evergreen and why we do what we do.", "Our Story") +
+        f'''
+<!-- ABOUT SECTION -->
+<section id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-img-stack sr">
+        <div class="about-img-main">
+          <img src="https://images.pexels.com/photos/1453499/pexels-photo-1453499.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1"
+               alt="Evergreen Outdoor Living team maintaining a client's backyard" loading="lazy" onerror="imgFallback(this)">
+        </div>
+        <div class="about-img-accent">
+          <img src="https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&dpr=1"
+               alt="Beautiful flowering garden basket detail" loading="lazy" onerror="imgFallback(this)">
+        </div>
+      </div>
+      <div>
+        <div class="eyebrow sr">Our Story</div>
+        <h2 class="section-title sr d1" id="about-title">Rooted in the Tri-City Since 2009</h2>
+        <p class="sr d2" style="font-size:1rem;color:var(--text-lt);line-height:1.78;margin-bottom:1.25rem">
+          Evergreen Outdoor Living started as a two-person lawn care operation out of a pickup truck. Today we're a full-service landscaping firm with a team of 18, but our values haven't changed.
+        </p>
+        <p class="sr d2" style="font-size:1rem;color:var(--text-lt);line-height:1.78;margin-bottom:1.5rem">
+          We still treat every property like it's our own. We still believe in honest pricing, careful workmanship, and standing behind what we build. Every project gets the same attention whether it's a $500 cleanup or a $50,000 complete renovation.
+        </p>
+        <div class="about-values sr d3">
+          <div class="about-value"><div class="about-value-dot"></div><p><strong>Family-owned and operated.</strong> You deal directly with the owners — not a call center, not a franchise.</p></div>
+          <div class="about-value"><div class="about-value-dot"></div><p><strong>A crew you can trust.</strong> Same team members return to your property year after year. You get to know us.</p></div>
+          <div class="about-value"><div class="about-value-dot"></div><p><strong>We guarantee our work.</strong> If you're not happy with the result, we make it right — no questions, no arguments.</p></div>
+        </div>
+        <div class="about-sig sr d4">Marcus &amp; Clara Evans<small>Founders, Evergreen Outdoor Living</small></div>
+        <div style="margin-top:1.75rem" class="sr d5">
+          <a href="{p}contact/" class="btn btn-primary">Work With Us</a>
+          <a href="{p}projects/" class="btn btn-outline-dk" style="margin-left:1rem;">See Our Work</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>''' +
+        why_us() +
+        STATS +
+        cta_band(p) +
+        footer_html(p) +
+        mob_bar(p) +
+        '\n' + script(p) +
+        '\n</body>\n</html>'
+    )
+
+def build_contact():
+    p = "../"
+    return (
+        head("Get a Free Estimate", "Contact Evergreen Outdoor Living for a free landscaping estimate. We serve Kitchener, Cambridge, Waterloo, Guelph and surrounding areas.", p) +
+        topbar() + header(p, "contact") +
+        page_hero("Get a Free Estimate", "Tell us about your project. We'll visit your property and give you a detailed written quote within 48 hours. No pressure, no obligation.", "Get Started") +
+        contact_form(p) +
+        footer_html(p) +
+        mob_bar(p) +
+        '\n' + script(p) +
+        '\n</body>\n</html>'
+    )
+
+# ══════════════════════════════════════════════════════════════════
+# WRITE FILES
+# ══════════════════════════════════════════════════════════════════
+pages = {
+    f'{BASE}/index.html':          build_home(),
+    f'{BASE}/services/index.html': build_services(),
+    f'{BASE}/projects/index.html': build_projects(),
+    f'{BASE}/about/index.html':    build_about(),
+    f'{BASE}/contact/index.html':  build_contact(),
+}
+
+for path, content in pages.items():
+    with open(path, 'w') as f:
+        f.write(content)
+    print(f'Written: {path}  ({len(content):,} chars)')
+
+print('\nAll pages written.')
